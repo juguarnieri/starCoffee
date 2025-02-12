@@ -23,6 +23,16 @@ class PedidoLista {
       };
     }
   
-};
-  module.exports = PedidoLista;
+    deletePedido(id) {
+      const pedido = this.getPedidoById(id);
+      if (!pedido) {
+        throw new Error("Pedido não encontrado.");
+      }
+      if (pedido.status !== "recebido") {
+        throw new Error("O pedido já está em preparação e não pode ser cancelado.");
+      }
+      this.pedidos = this.pedidos.filter((p) => p.id !== id);
+    }
+  }
   
+  module.exports = PedidoLista;
