@@ -59,7 +59,7 @@ const pedidoController = {
       const pedido = listaPedidos.getPedidoById(req.params.id);
       if (pedido.status !== "recebido") {
         return res.status(400).json({
-          message: "Não é possível cancelar um pedido que não esteja no status 'recebido'.",
+          message: "Não é possível cancelar um pedido que não esteja no status 'recebido', ou seja, que já está em preparação.",
         });
       }
       listaPedidos.deletePedido(req.params.id);
