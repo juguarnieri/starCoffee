@@ -1,22 +1,33 @@
 {
   "name": "starcoffe-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "CLS && nodemon server.js"
+    "dev": "CLS && nodemon server.js",
+    "start": "node server.js"
   },
-  "keywords": ["API", "senai", "StarCoffe"],
+  "keywords": [
+    "API",
+    "senai",
+    "StarCoffe"
+  ],
   "author": "Júlia",
   "license": "MIT",
   "description": "Está armazenado o projeto API REST do Star Coffe de Back-End.",
-  "devDependencies": {
-    "nodemon": "^3.1.9"
-  },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "nodemon": "^3.1.9",
     "uuid": "^11.0.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juguarnieri/starCoffe.git"
+  },
+  "bugs": {
+    "url": "https://github.com/juguarnieri/starCoffe/issues"
+  },
+  "homepage": "https://github.com/juguarnieri/starCoffe#readme"
 }
