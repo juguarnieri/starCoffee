@@ -37,6 +37,40 @@ const pedidoController = {
         error: error.message,
       });
     }
-    };
+  },
+
+  getPedidoById: (req, res) => {
+    try {
+      const pedido = listaPedidos.getPedidoById(req.params.id);
+      res.status(200).json({
+        message: "Pedido encontrado",
+        pedido,
+      });
+    } catch (error) {
+      res.status(404).json({
+        message: "Erro ao buscar pedido por Id.",
+        error: error.message,
+      });
+    }
+  },
+
+  deletePedido: (req, res) => {
+    try {
+      const pedido = listaPedidos.getPedidoById(req.params.id);
+      if (pedido.status !== "recebido") {
+        return res.status(400).json({
+          message: "Não é possível cancelar um pedido que não esteja no status 'recebido'.",
+        });
+      }
+      listaPedidos.deletePedido(req.params.id);
+      res.status(200).json({ message: "Pedido cancelado com sucesso!" });
+    } catch (error) {
+      res.status(404).json({
+        message: "Erro ao cancelar pedido",
+        error: error.message,
+      });
+    }
+  },
+};
 
 module.exports = pedidoController;
