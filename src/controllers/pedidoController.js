@@ -5,23 +5,23 @@ const Produto = require("../models/Produto.js");
 const item1 = new Produto("Café com Leite", 5.0);
 const item2 = new Produto("Pão de Queijo", 3.0);
 const item3 = new Produto("Tapioca", 7.0);
-const item4 = new Produto("Bolo de Cenoura", 4.0);
-const item5 = new Produto("Suco de Laranja", 3.0);
+const item4 = new Produto("Bolo de Cenoura", 4.0, "pronto");
+const item5 = new Produto("Suco de Laranja", 3.0, "pronto");
 
 const menu = new ListaMenu();
 
-menu.addProduto(item1);
-menu.addProduto(item2);
-menu.addProduto(item3);
-menu.addProduto(item4);
-menu.addProduto(item5);
+menu.addPedido(item1);
+menu.addPedido(item2);
+menu.addPedido(item3);
+menu.addPedido(item4);
+menu.addPedido(item5);
 
 const listaPedidos = new PedidoLista();
 
 const pedidoController = {
   getMenu: (req, res) => {
     try {
-      res.status(200).json(menu); // Retorna o menu com os IDs fixos
+      res.status(200).json(menu);
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar o menu!", error: error.message });
     }
