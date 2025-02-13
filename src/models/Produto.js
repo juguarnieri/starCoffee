@@ -1,6 +1,8 @@
+
+const { v4: uuid4 } = require("uuid");
 class Produto {
-    constructor(id, nome, preco) {
-        this.id = id;
+    constructor(nome, preco) {
+        this.id = uuid4();
         this.nome = nome;
         this.preco = preco;
     }

@@ -1,32 +1,43 @@
-const Pedido = require("../models/Pedido.js");
+const ListaMenu = require("../models/ListaMenu.js");
 const PedidoLista = require("../models/PedidoLista.js");
+const Produto = require("../models/Produto.js");
+
+const item1 = new Produto("Café com Leite", 5.0);
+const item2 = new Produto("Pão de Queijo", 3.0);
+const item3 = new Produto("Tapioca", 7.0);
+const item4 = new Produto("Bolo de Cenoura", 4.0);
+const item5 = new Produto("Suco de Laranja", 3.0);
+
+const menu = new ListaMenu();
+
+menu.addProduto(item1);
+menu.addProduto(item2);
+menu.addProduto(item3);
+menu.addProduto(item4);
+menu.addProduto(item5);
 
 const listaPedidos = new PedidoLista();
 
 const pedidoController = {
   getMenu: (req, res) => {
     try {
-      const menu = [
-        { id: 1, nome: "Café Expresso", preco: 5.0 },
-        { id: 2, nome: "Cappuccino", preco: 7.5 },
-        { id: 3, nome: "Pão de Queijo", preco: 4.0 },
-        { id: 4, nome: "Misto Quente", preco: 10.0 },
-        { id: 5, nome: "Bolo de Chocolate", preco: 7.0 },
-      ];
-      res.status(200).json(menu);
+      res.status(200).json(menu); // Retorna o menu com os IDs fixos
     } catch (error) {
       res.status(500).json({ message: "Erro ao buscar o menu!", error: error.message });
     }
   },
+
   addPedido: (req, res) => {
     try {
-      const { itens, status } = req.body; 
+      const { itens, status } = req.body;
       if (!itens || itens.length === 0) {
         throw new Error("O pedido deve conter pelo menos um item.");
       }
-      const statusPedido = status || "recebido"; 
+
+      const statusPedido = status || "recebido";
       const novoPedido = new Pedido(itens, statusPedido);
       listaPedidos.addPedido(novoPedido);
+
       res.status(201).json({
         message: "Pedido criado com sucesso!",
         pedido: novoPedido,
@@ -59,7 +70,7 @@ const pedidoController = {
       const pedido = listaPedidos.getPedidoById(req.params.id);
       if (pedido.status !== "recebido") {
         return res.status(400).json({
-          message: "Não é possível cancelar um pedido que não esteja no status 'recebido', ou seja, que já está em preparação.",
+          message: "Não é possível cancelar um pedido que já está em preparação.",
         });
       }
       listaPedidos.deletePedido(req.params.id);

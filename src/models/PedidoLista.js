@@ -3,12 +3,12 @@ class PedidoLista {
       this.pedidos = [];
     }
   
-    addPedido(pedido) {
-      if (!pedido.id) {
+    addPedido(produto) {
+      if (!produto.id) {
         throw new Error("O pedido precisa ter um ID definido.");
       }
-      this.pedidos.push(pedido);
-      return pedido;
+      this.pedidos.push(produto);
+      return produto;
     }
   
     getPedidoById(id) {
