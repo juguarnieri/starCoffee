@@ -1,41 +1,37 @@
-# Documentação da API StarCafé
+# Documentação da API - StarCafé
 
 ## Introdução
 A API StarCafé permite acessar o cardápio, realizar pedidos e consultar ou cancelar pedidos feitos na cafeteria. Todas as respostas são retornadas no formato JSON.
 
 ## Endpoints
 
-### 1. GET /menu
-**Descrição:** Retorna o cardápio da cafeteria.
+### 1. GET /api/menu
+**Descrição:** Retorna o cardápio da cafeteria, com todos os produtos disponíveis.
 
 **Cabeçalhos da Requisição:**
 - `Accept: application/json` → Indica que o cliente deseja receber a resposta no formato JSON.
 
 **Códigos de Status:**
 - `200 OK` → Retorna com sucesso o cardápio.
-- `500 Internal Server Error` → Erro ao buscar o menu.
 
 **Exemplo de Requisição:**
 ```http
-GET /menu HTTP/1.1
+GET /api/menu HTTP/1.1
 Host: api.starcafe.com
 Accept: application/json
 ```
 
 **Exemplo de Resposta:**
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 [
-  { "id": 1, "nome": "Café Expresso", "preco": 5.0 },
-  { "id": 2, "nome": "Cappuccino", "preco": 7.5 }
+  {"nome": "Café com Leite", "preco": 5.0, "status": "pendente"},
+  {"nome": "Pão de Queijo", "preco": 3.0, "status": "pendente"}
 ]
 ```
 
 ---
 
-### 2. POST /order
+### 2. POST /api/order
 **Descrição:** Permite que um cliente faça um pedido.
 
 **Cabeçalhos da Requisição:**
@@ -44,46 +40,37 @@ Content-Type: application/json
 
 **Códigos de Status:**
 - `201 Created` → Pedido criado com sucesso.
-- `400 Bad Request` → Erro ao criar o pedido (exemplo: pedido vazio).
-- `500 Internal Server Error` → Erro inesperado no servidor.
+- `400 Bad Request` → Erro ao criar o pedido (exemplo: pedido vazio ou item inexistente).
 
 **Exemplo de Requisição:**
 ```http
-POST /order HTTP/1.1
+POST /api/order HTTP/1.1
 Host: api.starcafe.com
 Content-Type: application/json
 Accept: application/json
 
 {
-  "itens": [
-    { "id": 1, "quantidade": 2 },
-    { "id": 3, "quantidade": 1 }
-  ]
+  "itens": ["Café com Leite", "Pão de Queijo"]
 }
 ```
 
 **Exemplo de Resposta:**
 ```json
-HTTP/1.1 201 Created
-Location: /order/1700000000000
-Content-Type: application/json
-
 {
-  "message": "Pedido criado com sucesso!",
+  "message": "Pedido realizado com sucesso!",
   "pedido": {
-    "id": 1700000000000,
+    "id": "123e4567-e89b-12d3-a456-426614174000",
     "itens": [
-      { "id": 1, "quantidade": 2 },
-      { "id": 3, "quantidade": 1 }
-    ],
-    "status": "recebido"
+      {"nome": "Café com Leite", "preco": 5.0, "status": "pendente"},
+      {"nome": "Pão de Queijo", "preco": 3.0, "status": "pendente"}
+    ]
   }
 }
 ```
 
 ---
 
-### 3. GET /order/:id
+### 3. GET /api/order/:id
 **Descrição:** Consulta o status de um pedido.
 
 **Cabeçalhos da Requisição:**
@@ -92,35 +79,28 @@ Content-Type: application/json
 **Códigos de Status:**
 - `200 OK` → Pedido encontrado.
 - `404 Not Found` → Pedido não encontrado.
-- `500 Internal Server Error` → Erro inesperado no servidor.
 
 **Exemplo de Requisição:**
 ```http
-GET /order/1700000000000 HTTP/1.1
+GET /api/order/123e4567-e89b-12d3-a456-426614174000 HTTP/1.1
 Host: api.starcafe.com
 Accept: application/json
 ```
 
 **Exemplo de Resposta:**
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
-  "message": "Pedido encontrado",
-  "pedido": {
-    "id": 1700000000000,
-    "itens": [
-      { "id": 1, "quantidade": 2 }
-    ],
-    "status": "recebido"
-  }
+  "id": "123e4567-e89b-12d3-a456-426614174000",
+  "itens": [
+    {"nome": "Café com Leite", "preco": 5.0, "status": "pendente"}
+  ],
+  "status": "pendente"
 }
 ```
 
 ---
 
-### 4. DELETE /order/:id
+### 4. DELETE /api/order/:id
 **Descrição:** Cancela um pedido (caso ainda não tenha sido preparado).
 
 **Cabeçalhos da Requisição:**
@@ -128,22 +108,18 @@ Content-Type: application/json
 
 **Códigos de Status:**
 - `200 OK` → Pedido cancelado com sucesso.
-- `400 Bad Request` → Pedido não pode ser cancelado (já foi preparado ou está em andamento).
+- `403 Forbidden` → Pedido não pode ser cancelado pois já está em andamento ou finalizado.
 - `404 Not Found` → Pedido não encontrado.
-- `500 Internal Server Error` → Erro inesperado no servidor.
 
 **Exemplo de Requisição:**
 ```http
-DELETE /order/1700000000000 HTTP/1.1
+DELETE /api/order/123e4567-e89b-12d3-a456-426614174000 HTTP/1.1
 Host: api.starcafe.com
 Accept: application/json
 ```
 
 **Exemplo de Resposta:**
 ```json
-HTTP/1.1 200 OK
-Content-Type: application/json
-
 {
   "message": "Pedido cancelado com sucesso!"
 }
@@ -151,9 +127,22 @@ Content-Type: application/json
 
 ---
 
-## Considerações Finais
-- Todos os endpoints retornam respostas no formato JSON.
-- Os cabeçalhos HTTP garantem a comunicação adequada entre cliente e servidor.
-- Erros são tratados com os códigos de status apropriados.
-```
+## Cabeçalhos HTTP
+- `Content-Type: application/json` → Indica que o corpo da requisição e resposta está em JSON.
+- `Accept: application/json` → Indica que o cliente espera uma resposta em JSON.
 
+## Tecnologias Utilizadas
+- Node.js
+- Express
+- UUID para identificação de pedidos e produtos
+
+## Como Executar
+1. Instale as dependências:
+   ```sh
+   npm install
+   ```
+2. Inicie o servidor:
+   ```sh
+   npm start
+   ```
+3. Acesse a API em `http://localhost:3000/api`
