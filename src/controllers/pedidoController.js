@@ -1,87 +1,102 @@
-const ListaMenu = require("../models/ListaMenu.js");
-const PedidoLista = require("../models/PedidoLista.js");
-const Produto = require("../models/Produto.js");
+const PedidoLista = require("../models/PedidoLista");
+const Produto = require("../models/Produto");
+const ListaMenu = require("../models/ListaMenu");
 
-const item1 = new Produto("Café com Leite", 5.0);
-const item2 = new Produto("Pão de Queijo", 3.0);
-const item3 = new Produto("Tapioca", 7.0);
-const item4 = new Produto("Bolo de Cenoura", 4.0, "pronto");
-const item5 = new Produto("Suco de Laranja", 3.0, "pronto");
+const listaMenu = new ListaMenu();
+const produtos = [
+    new Produto("Café com Leite", 5.0, "pendente"),
+    new Produto("Pão de Queijo", 3.0, "pendente"),
+    new Produto("Tapioca", 7.0, "pronto"),
+    new Produto("Bolo de Cenoura", 4.0, "pronto"),
+    new Produto("Suco de Laranja", 3.0, "em preparação")
+];
 
-const menu = new ListaMenu();
+// Usando o forEach para adicionar os produtos ao menu
+produtos.forEach(produto => listaMenu.addProduto(produto));
 
-menu.addPedido(item1);
-menu.addPedido(item2);
-menu.addPedido(item3);
-menu.addPedido(item4);
-menu.addPedido(item5);
-
-const listaPedidos = new PedidoLista();
+const pedidos = new PedidoLista();
 
 const pedidoController = {
-  getMenu: (req, res) => {
-    try {
-      res.status(200).json(menu);
-    } catch (error) {
-      res.status(500).json({ message: "Erro ao buscar o menu!", error: error.message });
-    }
-  },
+  createOrder: (req, res) => {
+      try {
+          const { itens } = req.body;
+          // Valida se os itens são um array não vazio
+          if (!itens || !Array.isArray(itens) || itens.length === 0) {
+              return res.status(400).json({ error: "O pedido deve conter itens válidos." });
+          }
+          const pedidoItens = [];  // Lista para armazenar os itens do pedido
+          let statusPedido = "pendente"; 
+          // Itera sobre os itens do pedido, verificando se estão no menu
+          for (const nomeItem of itens) {
+              // Encontra o produto no menu com base no nome
+              const produto = listaMenu.getMenu().find(item => item.nome === nomeItem);
+              if (!produto) {
+                  // Retorna erro se o produto não for encontrado
+                  return res.status(400).json({ error: `Item '${nomeItem}' não encontrado no menu.` });
+              }
+              // Cria uma nova instância do produto para o pedido
+              const novoProduto = new Produto(produto.nome, produto.preco, produto.status);
+              pedidoItens.push(novoProduto);  // Adiciona o produto ao pedido
 
-  addPedido: (req, res) => {
-    try {
-      const { itens, status } = req.body;
-      if (!itens || itens.length === 0) {
-        throw new Error("O pedido deve conter pelo menos um item.");
+              // O status do pedido é determinado pelos status dos itens:
+              // - Se algum item estiver "pronto", o pedido será "pronto".
+             // - Se algum item estiver "em preparação" e nenhum item estiver "pronto", o pedido será "em preparação".
+             // - Caso contrário, o status do pedido será "pendente".
+              if (produto.status === "pronto") {
+                  statusPedido = "pronto";  
+              } else if (produto.status === "em preparação" && statusPedido !== "pronto") {
+                  statusPedido = "em preparação"; 
+              }
+          }
+
+          const pedido = pedidos.addPedido({
+              id: pedidoItens[0].id,  // ID do pedido (a partir do primeiro item)
+              itens: pedidoItens,  
+              status: statusPedido  
+          });
+
+          res.status(201).json({
+              message: "Pedido realizado com sucesso!",
+              pedido: {
+                  id: pedido.id,
+                  itens: pedido.itens.map(item => ({
+                      nome: item.nome,
+                      preco: item.preco,
+                      status: item.status
+                  }))
+              }
+          });
+      } catch (error) {
+          res.status(400).json({ error: error.message });
       }
-
-      const statusPedido = status || "recebido";
-      const novoPedido = new Pedido(itens, statusPedido);
-      listaPedidos.addPedido(novoPedido);
-
-      res.status(201).json({
-        message: "Pedido criado com sucesso!",
-        pedido: novoPedido,
-      });
-    } catch (error) {
-      res.status(400).json({
-        message: "Erro ao criar pedido",
-        error: error.message,
-      });
-    }
   },
 
-  getPedidoById: (req, res) => {
-    try {
-      const pedido = listaPedidos.getPedidoById(req.params.id);
-      res.status(200).json({
-        message: "Pedido encontrado",
-        pedido,
-      });
-    } catch (error) {
-      res.status(404).json({
-        message: "Erro ao buscar pedido por Id.",
-        error: error.message,
-      });
-    }
-  },
+    getMenu: (req, res) => {
+        res.json(listaMenu.getMenu());
+    },
 
-  deletePedido: (req, res) => {
-    try {
-      const pedido = listaPedidos.getPedidoById(req.params.id);
-      if (pedido.status !== "recebido") {
-        return res.status(400).json({
-          message: "Não é possível cancelar um pedido que já está em preparação.",
-        });
+    getOrderById: (req, res) => {
+        try {
+            const pedido = pedidos.getPedidoById(req.params.id);
+            res.json(pedido);
+        } catch (error) {
+            res.status(404).json({ error: error.message });
+        }
+    },
+
+    deleteOrder: (req, res) => { 
+      try {
+          const pedido = pedidos.getPedidoById(req.params.id);
+  
+          // Se o status do pedido for diferente de "pendente", não pode ser cancelado
+          if (pedido.status === "pronto" || pedido.status === "finalizado" || pedido.status === "em preparação") {
+              return res.status(403).json({ error: "O pedido não pode ser cancelado pois já foi finalizado ou está em outro status." });
+          }
+          pedidos.deletePedido(req.params.id);
+          res.json({ message: "Pedido cancelado com sucesso!" });
+      } catch (error) {
+          res.status(403).json({ error: error.message });
       }
-      listaPedidos.deletePedido(req.params.id);
-      res.status(200).json({ message: "Pedido cancelado com sucesso!" });
-    } catch (error) {
-      res.status(404).json({
-        message: "Erro ao cancelar pedido",
-        error: error.message,
-      });
-    }
-  },
-};
-
+  }
+};  
 module.exports = pedidoController;
