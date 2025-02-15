@@ -24,8 +24,11 @@ Accept: application/json
 **Exemplo de Resposta:**
 ```json
 [
-  {"nome": "Café com Leite", "preco": 5.0, "status": "pendente"},
-  {"nome": "Pão de Queijo", "preco": 3.0, "status": "pendente"}
+  {"nome": "Café com Leite", "preco": 5.0, "tamanho": "grande", "status": "pendente"},
+  {"nome": "Pão de Queijo", "preco": 3.0, "tamanho": "médio", "status": "pendente"},
+  {"nome": "Tapioca", "preco": 7.0, "tamanho": "grande", "status": "em preparação"},
+  {"nome": "Bolo de Cenoura", "preco": 4.0, "tamanho": "grande", "status": "pronto"},
+  {"nome": "Café Expresso", "preco": 3.0, "tamanho": "pequeno", "status": "pendente"}
 ]
 ```
 
@@ -63,7 +66,8 @@ Accept: application/json
     "itens": [
       {"nome": "Café com Leite", "preco": 5.0, "status": "pendente"},
       {"nome": "Pão de Queijo", "preco": 3.0, "status": "pendente"}
-    ]
+    ],
+    "status": "pendente"
   }
 }
 ```
